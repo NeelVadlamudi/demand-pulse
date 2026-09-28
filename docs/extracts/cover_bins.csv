@@ -1,0 +1,9 @@
+bin_label,item_count,share_pct,over_month
+0–1,14,5.8,False
+1–2,94,39.2,False
+2–3,82,34.2,False
+3–4,17,7.1,False
+4–6,10,4.2,True
+6–8,2,0.8,True
+8–12,1,0.4,True
+12+,20,8.3,True
