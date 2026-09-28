@@ -1,0 +1,242 @@
+{
+  "meta": {
+    "project": "Demand Pulse (M5 Walmart)",
+    "disclaimer": "Public M5 Walmart sales data (Kaggle). Inventory cover is simulated with a simple reorder policy \u2014 not real on-hand. Not affiliated with Walmart or any retailer.",
+    "source": {
+      "name": "M5 Forecasting Accuracy (Walmart / Kaggle)",
+      "url": "https://www.kaggle.com/c/m5-forecasting-accuracy/data",
+      "files": [
+        "calendar.csv",
+        "sell_prices.csv",
+        "sales_train_evaluation.csv"
+      ],
+      "mirror_used": "https://huggingface.co/datasets/denephew/M5_Forecasting",
+      "license_note": "Public M5 competition data mirrored on Hugging Face. Not affiliated with Walmart.",
+      "filter": "3 California stores (CA_1, CA_2, CA_3) \u00d7 top 80 items by total unit volume across those stores over d_1..d_1941",
+      "subset": {
+        "stores": [
+          "CA_1",
+          "CA_2",
+          "CA_3"
+        ],
+        "top_n_items": 80,
+        "series": 240
+      }
+    },
+    "date_window": {
+      "full_min": "2011-01-29",
+      "full_max": "2016-05-22",
+      "holdout_min": "2016-04-25",
+      "holdout_max": "2016-05-22",
+      "holdout_days": 28,
+      "wos_week": "2016-05-16"
+    },
+    "row_counts": {
+      "raw_evaluation_series": 30490,
+      "rows_kept_daily": 465840,
+      "series_kept": 240,
+      "holdout_rows": 6720,
+      "holdout_week_rows": 960,
+      "stores": 3,
+      "products": 80,
+      "store_product_keys": 240
+    },
+    "methods": {
+      "system_plan": "Pure trailing 28-day mean of prior days (no leakage). Built daily; locked WMAPE/bias scored on weekly rollups. Won this holdout vs a YoY blend.",
+      "challenge_check": "50/50 same-weekday-last-year (364-day lag) + trailing 28-day mean, weekly rollup (notebook only): 27.4% WMAPE / -3.5% bias \u2014 LOST to the pure trail on this holdout (level drift vs last year).",
+      "inventory_sim": "Start on-hand = 3.0 \u00d7 pre-holdout avg weekly sales; each week deplete by actual sales; reorder up to 3.0 weeks of plan with lead time 1 week. Simulated \u2014 not real Walmart inventory.",
+      "tile4_choice": "Chose overstock share (WOS>4); simulated stockouts were under 0.5% of holdout demand.",
+      "scoring_grain": "Weekly for locked WMAPE/bias (buyer plan grain); daily plan construction.",
+      "note": "No neural nets, Prophet, XGBoost, LightGBM, or deep learning. Locked the simple method that won."
+    },
+    "blunt_trailing_28d_wmape_pct": 19.87,
+    "challenge_yoy_blend_wmape_pct": 27.45,
+    "display_note": "Product labels are real M5 item_id values (e.g. FOODS_3_090). dept_id / cat_id decode the hierarchy: FOODS / HOBBIES / HOUSEHOLD."
+  },
+  "tiles": {
+    "wmape_system": {
+      "value": 19.87,
+      "label": "Plan missed sales by",
+      "definition": "Weekly WMAPE of the trailing-28-day system plan vs actual on the 28-day holdout (daily plan summed to weeks). Lower is better.",
+      "plain": "Plan missed sales by 20%"
+    },
+    "bias_pct": {
+      "value": 0.67,
+      "label": "Plan ran high by",
+      "definition": "sum(plan \u2212 sales) / sum(sales) on weekly holdout rollups. Positive = over-forecast.",
+      "plain": "Plan ran about 1% high"
+    },
+    "avg_weeks_of_supply": {
+      "value": 3.248,
+      "label": "Avg cover",
+      "definition": "Simulated ending inventory \u00f7 that week's sales, averaged across items with sales on the last week. Not real Walmart on-hand.",
+      "plain": "Avg cover about 3 weeks"
+    },
+    "overstock_share_pct": {
+      "value": 13.8,
+      "label": "Items over a month of stock",
+      "definition": "Share of items with more than 4 weeks of simulated cover on the last week.",
+      "plain": "1 in 10 items over a month of stock"
+    }
+  },
+  "scenario": {
+    "name": "FOODS +10% Mother's Day / spring-holiday lift (holdout window)",
+    "baseline_units": 73941.0,
+    "scenario_units": 81335.1,
+    "delta_units": 7394.1,
+    "delta_pct": 10.0,
+    "baseline_revenue": 148191.24,
+    "scenario_revenue": 163010.36,
+    "delta_revenue": 14819.12,
+    "one_sentence": "If FOODS sells 10% hotter over the holdout (Mother's Day week in window), that is about 7,394 extra units (~$14,819). Check whether simulated cover can take the lift before you buy.",
+    "plain": "If FOODS sells 10% hotter \u2192 +7.4k units / ~$15k \u2014 check whether stock can cover it"
+  },
+  "exceptions": [
+    {
+      "product": "FOODS_3_362",
+      "category": "Foods / FOODS_3",
+      "store": "CA store 3 (CA_3)",
+      "store_id": "CA_3",
+      "product_id": "FOODS_3_362",
+      "metric": "wmape_pct",
+      "value": 160.9,
+      "why": "Plan missed sales by about 161%.",
+      "action": "Trim the next order \u2014 plan has been running high here.",
+      "tip": "Trim the next order \u2014 plan has been running high here.",
+      "display": "FOODS_3_362 \u00b7 Foods / FOODS_3 \u00b7 CA store 3 (CA_3)",
+      "weeks_of_supply": 3.17,
+      "bias_pct_holdout": 103.0
+    },
+    {
+      "product": "FOODS_3_234",
+      "category": "Foods / FOODS_3",
+      "store": "CA store 2 (CA_2)",
+      "store_id": "CA_2",
+      "product_id": "FOODS_3_234",
+      "metric": "wmape_pct",
+      "value": 153.17,
+      "why": "Plan missed sales by about 153%.",
+      "action": "Trim the next order \u2014 plan has been running high here.",
+      "tip": "Trim the next order \u2014 plan has been running high here.",
+      "display": "FOODS_3_234 \u00b7 Foods / FOODS_3 \u00b7 CA store 2 (CA_2)",
+      "weeks_of_supply": 0.39,
+      "bias_pct_holdout": 9.45
+    },
+    {
+      "product": "HOUSEHOLD_1_334",
+      "category": "Household / HOUSEHOLD_1",
+      "store": "CA store 1 (CA_1)",
+      "store_id": "CA_1",
+      "product_id": "HOUSEHOLD_1_334",
+      "metric": "wmape_pct",
+      "value": 140.74,
+      "why": "Plan missed sales by about 141%.",
+      "action": "Trim the next order \u2014 plan high and cover is already over a month.",
+      "tip": "Trim the next order \u2014 plan high and cover is already over a month.",
+      "display": "HOUSEHOLD_1_334 \u00b7 Household / HOUSEHOLD_1 \u00b7 CA store 1 (CA_1)",
+      "weeks_of_supply": 5.02,
+      "bias_pct_holdout": 120.7
+    },
+    {
+      "product": "FOODS_3_362",
+      "category": "Foods / FOODS_3",
+      "store": "CA store 1 (CA_1)",
+      "store_id": "CA_1",
+      "product_id": "FOODS_3_362",
+      "metric": "wmape_pct",
+      "value": 139.07,
+      "why": "Plan missed sales by about 139%.",
+      "action": "Trim the next order \u2014 plan has been running high here.",
+      "tip": "Trim the next order \u2014 plan has been running high here.",
+      "display": "FOODS_3_362 \u00b7 Foods / FOODS_3 \u00b7 CA store 1 (CA_1)",
+      "weeks_of_supply": 1.71,
+      "bias_pct_holdout": 56.52
+    },
+    {
+      "product": "FOODS_3_362",
+      "category": "Foods / FOODS_3",
+      "store": "CA store 2 (CA_2)",
+      "store_id": "CA_2",
+      "product_id": "FOODS_3_362",
+      "metric": "wmape_pct",
+      "value": 132.03,
+      "why": "Plan missed sales by about 132%.",
+      "action": "Trim the next order \u2014 plan has been running high here.",
+      "tip": "Trim the next order \u2014 plan has been running high here.",
+      "display": "FOODS_3_362 \u00b7 Foods / FOODS_3 \u00b7 CA store 2 (CA_2)",
+      "weeks_of_supply": 1.7,
+      "bias_pct_holdout": 38.15
+    },
+    {
+      "product": "FOODS_3_741",
+      "category": "Foods / FOODS_3",
+      "store": "CA store 3 (CA_3)",
+      "store_id": "CA_3",
+      "product_id": "FOODS_3_741",
+      "metric": "wmape_pct",
+      "value": 83.64,
+      "why": "Plan missed sales by about 84%.",
+      "action": "Trim the next order \u2014 plan high and cover is already over a month.",
+      "tip": "Trim the next order \u2014 plan high and cover is already over a month.",
+      "display": "FOODS_3_741 \u00b7 Foods / FOODS_3 \u00b7 CA store 3 (CA_3)",
+      "weeks_of_supply": 6.65,
+      "bias_pct_holdout": 83.64
+    },
+    {
+      "product": "FOODS_3_764",
+      "category": "Foods / FOODS_3",
+      "store": "CA store 2 (CA_2)",
+      "store_id": "CA_2",
+      "product_id": "FOODS_3_764",
+      "metric": "wmape_pct",
+      "value": 73.2,
+      "why": "Plan missed sales by about 73%.",
+      "action": "Trim the next order \u2014 plan has been running high here.",
+      "tip": "Trim the next order \u2014 plan has been running high here.",
+      "display": "FOODS_3_764 \u00b7 Foods / FOODS_3 \u00b7 CA store 2 (CA_2)",
+      "weeks_of_supply": 1.93,
+      "bias_pct_holdout": 37.27
+    },
+    {
+      "product": "FOODS_3_007",
+      "category": "Foods / FOODS_3",
+      "store": "CA store 1 (CA_1)",
+      "store_id": "CA_1",
+      "product_id": "FOODS_3_007",
+      "metric": "wmape_pct",
+      "value": 71.7,
+      "why": "Plan missed sales by about 72%.",
+      "action": "Trim the next order \u2014 sitting on more than four weeks of cover.",
+      "tip": "Trim the next order \u2014 sitting on more than four weeks of cover.",
+      "display": "FOODS_3_007 \u00b7 Foods / FOODS_3 \u00b7 CA store 1 (CA_1)",
+      "weeks_of_supply": 5.47,
+      "bias_pct_holdout": -21.84
+    }
+  ],
+  "glossary": [
+    {
+      "term": "Plan miss (WMAPE)",
+      "plain": "How far the plan missed sales, weighted by volume (weekly grain)."
+    },
+    {
+      "term": "Plan high/low (bias)",
+      "plain": "Whether we planned more or less than we sold overall."
+    },
+    {
+      "term": "Cover (weeks of supply)",
+      "plain": "How many weeks simulated stock lasts at last week's sell-through."
+    },
+    {
+      "term": "Over a month of stock",
+      "plain": "Items sitting on more than four weeks of simulated cover."
+    },
+    {
+      "term": "System plan",
+      "plain": "Trailing 28-day mean of prior days \u2014 the simple method that beat a YoY blend on this holdout."
+    },
+    {
+      "term": "Simulated inventory",
+      "plain": "Simple weekly reorder-to-cover policy on top of public sales. Not real Walmart on-hand."
+    }
+  ]
+}
