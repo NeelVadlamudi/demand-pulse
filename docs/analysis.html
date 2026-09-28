@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#000000" />
+  <title>Demand Pulse · Charts</title>
+  <meta name="description" content="Demand Pulse — plan vs actual, method bake-off, exceptions, and simulated cover charts." />
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="./assets/css/fonts.css" />
+  <link rel="stylesheet" href="./assets/css/analysis.css" />
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+</head>
+<body>
+  <div class="app">
+    <div class="ambient" aria-hidden="true"></div>
+
+    <header class="topbar">
+      <div class="brand">
+        <div class="wordmark">Demand Pulse</div>
+        <p class="subtitle">interactive charts · same holdout as the live board</p>
+      </div>
+      <div class="top-tools">
+        <a class="nav-link" href="./index.html">Live board</a>
+        <time class="as-of" datetime="2016-04-25">Holdout · 2016-04-25 → 2016-05-22</time>
+      </div>
+    </header>
+
+    <div class="toolbar" role="group" aria-label="Store filter">
+      <span class="toolbar-label">Store</span>
+      <button type="button" class="chip" data-store="ALL" aria-pressed="true">All CA stores</button>
+      <button type="button" class="chip" data-store="CA_1" aria-pressed="false">California store 1</button>
+      <button type="button" class="chip" data-store="CA_2" aria-pressed="false">California store 2</button>
+      <button type="button" class="chip" data-store="CA_3" aria-pressed="false">California store 3</button>
+    </div>
+
+    <div class="gloss-strip" role="region" aria-label="KPI explanations">
+      <div class="gloss-chip">
+        <span class="gloss-term">Plan miss (WMAPE)</span>
+        <span class="gloss-plain">How far the plan missed sales, weighted by volume (weekly grain). <span class="locked">Locked: 19.87%</span>.</span>
+      </div>
+      <div class="gloss-chip">
+        <span class="gloss-term">Plan high/low (bias)</span>
+        <span class="gloss-plain">Whether we planned more or less than we sold overall. <span class="locked">Locked: +0.67%</span>.</span>
+      </div>
+      <div class="gloss-chip">
+        <span class="gloss-term">Cover (weeks of supply)</span>
+        <span class="gloss-plain">How many weeks simulated stock lasts at last week’s sell-through. Avg <span class="locked">~3.25</span>.</span>
+      </div>
+      <div class="gloss-chip">
+        <span class="gloss-term">Over a month of stock</span>
+        <span class="gloss-plain">Items sitting on more than four weeks of simulated cover. <span class="locked">Locked: 13.8%</span>.</span>
+      </div>
+      <div class="gloss-chip">
+        <span class="gloss-term">System plan</span>
+        <span class="gloss-plain">Trailing 28-day mean of prior days — beat a YoY blend on this holdout.</span>
+      </div>
+    </div>
+
+    <main class="stage">
+      <section class="glass wide" aria-label="Plan vs actual">
+        <h2 class="card-title">Plan vs actual (holdout weeks)</h2>
+        <p class="card-note">Weekly units · system plan (trail-28) vs actual sales · optional YoY blend shown dashed</p>
+        <div id="plan-actual" class="chart tall"></div>
+      </section>
+
+      <section class="glass" aria-label="Method bake-off">
+        <h2 class="card-title">Method bake-off</h2>
+        <p class="card-note">Weekly WMAPE on the holdout · lower is better · trail-28 won</p>
+        <div id="bakeoff" class="chart"></div>
+      </section>
+
+      <section class="glass" aria-label="Simulated cover">
+        <h2 class="card-title">Simulated cover (last week)</h2>
+        <p class="card-note">Item share by weeks of supply · bars past 4 weeks = over a month of stock (13.8%)</p>
+        <div id="cover" class="chart"></div>
+      </section>
+
+      <section class="glass wide" aria-label="Top plan misses">
+        <h2 class="card-title">Largest plan misses</h2>
+        <p class="card-note">Top 8 exceptions · weekly WMAPE · plain English labels</p>
+        <div id="exceptions" class="chart tall"></div>
+      </section>
+
+      <section class="glass wide" aria-label="Scenario lift">
+        <h2 class="card-title">Scenario · FOODS +10% Mother’s Day lift</h2>
+        <p class="card-note">Holdout window · check whether simulated cover can take the lift before you buy</p>
+        <div class="scenario-call">
+          <div><span class="stat-v" id="sc-units">+7,394 units</span><span class="stat-k">extra demand</span></div>
+          <div><span class="stat-v" id="sc-rev">~$15k</span><span class="stat-k">~$14,819 exact</span></div>
+          <p class="one" id="sc-one">If FOODS sells 10% hotter over the holdout, that is about 7.4k extra units (~$15k).</p>
+        </div>
+        <div id="scenario" class="chart"></div>
+      </section>
+    </main>
+
+    <footer class="legal">
+      <p class="disclaimer">
+        Public M5 Walmart sales data (Kaggle). Inventory cover is simulated with a simple reorder policy — not real on-hand. Not affiliated with Walmart or any retailer.
+      </p>
+      <span>
+        <a class="repo" href="./index.html">Live board</a>
+        ·
+        <a class="repo" href="https://github.com/NeelVadlamudi/demand-pulse">github.com/NeelVadlamudi/demand-pulse</a>
+      </span>
+    </footer>
+  </div>
+
+  <script>
+  (() => {
+    const ACCENT = "#f39444";
+    const DANGER = "#e85d5d";
+    const RESCUE = "#5dbf8a";
+    const MUTED = "rgba(255,255,255,0.38)";
+    const GRID = "rgba(255,255,255,0.08)";
+    const TEXT = "rgba(255,255,255,0.78)";
+    const SERIES = ["#f39444", "#5b8fd9", "#5dbf8a", "rgba(255,255,255,0.28)"];
+
+    const LAYOUT = {
+      paper_bgcolor: "rgba(0,0,0,0)",
+      plot_bgcolor: "rgba(0,0,0,0)",
+      font: { color: TEXT, family: "Geist Variable, Geist, system-ui, sans-serif", size: 12 },
+      margin: { t: 28, r: 16, b: 52, l: 52 },
+      xaxis: {
+        gridcolor: GRID,
+        zerolinecolor: GRID,
+        linecolor: "rgba(255,255,255,0.12)",
+        tickfont: { color: MUTED, family: "Geist Mono Variable, Geist Mono, monospace", size: 11 },
+        title: { font: { size: 11, color: MUTED } },
+      },
+      yaxis: {
+        gridcolor: GRID,
+        zerolinecolor: GRID,
+        linecolor: "rgba(255,255,255,0.12)",
+        tickfont: { color: MUTED, family: "Geist Mono Variable, Geist Mono, monospace", size: 11 },
+        title: { font: { size: 11, color: MUTED } },
+      },
+      legend: {
+        orientation: "h",
+        y: 1.14,
+        x: 0,
+        font: { size: 11, color: TEXT },
+        bgcolor: "rgba(0,0,0,0)",
+      },
+      hoverlabel: {
+        bgcolor: "rgba(18,18,20,0.92)",
+        bordercolor: "rgba(255,255,255,0.15)",
+        font: { family: "Geist Variable, Geist, system-ui, sans-serif", size: 12, color: "#fff" },
+      },
+    };
+    const CFG = { responsive: true, displayModeBar: true, displaylogo: false };
+
+    const EMBEDDED = {
+  "plan_vs_actual_weekly": [
+    {
+      "week": "2016-04-25",
+      "store_id": "ALL",
+      "sales": 20483.0,
+      "plan": 21588.1,
+      "plan_challenge": 20992.0
+    },
+    {
+      "week": "2016-05-02",
+      "store_id": "ALL",
+      "sales": 21017.0,
+      "plan": 21224.7,
+      "plan_challenge": 21007.4
+    },
+    {
+      "week": "2016-05-09",
+      "store_id": "ALL",
+      "sales": 21331.0,
+      "plan": 20963.0,
+      "plan_challenge": 19967.5
+    },
+    {
+      "week": "2016-05-16",
+      "store_id": "ALL",
+      "sales": 21323.0,
+      "plan": 20942.5,
+      "plan_challenge": 19276.8
+    },
+    {
+      "week": "2016-04-25",
+      "store_id": "CA_1",
+      "sales": 6333.0,
+      "plan": 6436.1,
+      "plan_challenge": 6682.5
+    },
+    {
+      "week": "2016-05-02",
+      "store_id": "CA_1",
+      "sales": 6714.0,
+      "plan": 6363.0,
+      "plan_challenge": 6976.0
+    },
+    {
+      "week": "2016-05-09",
+      "store_id": "CA_1",
+      "sales": 6596.0,
+      "plan": 6423.3,
+      "plan_challenge": 6603.2
+    },
+    {
+      "week": "2016-05-16",
+      "store_id": "CA_1",
+      "sales": 6725.0,
+      "plan": 6542.6,
+      "plan_challenge": 6472.3
+    },
+    {
+      "week": "2016-04-25",
+      "store_id": "CA_2",
+      "sales": 5037.0,
+      "plan": 5171.4,
+      "plan_challenge": 4082.7
+    },
+    {
+      "week": "2016-05-02",
+      "store_id": "CA_2",
+      "sales": 5075.0,
+      "plan": 5088.2,
+      "plan_challenge": 3843.1
+    },
+    {
+      "week": "2016-05-09",
+      "store_id": "CA_2",
+      "sales": 5459.0,
+      "plan": 5065.2,
+      "plan_challenge": 3861.6
+    },
+    {
+      "week": "2016-05-16",
+      "store_id": "CA_2",
+      "sales": 5518.0,
+      "plan": 5191.2,
+      "plan_challenge": 3915.1
+    },
+    {
+      "week": "2016-04-25",
+      "store_id": "CA_3",
+      "sales": 9113.0,
+      "plan": 9980.6,
+      "plan_challenge": 10226.8
+    },
+    {
+      "week": "2016-05-02",
+      "store_id": "CA_3",
+      "sales": 9228.0,
+      "plan": 9773.5,
+      "plan_challenge": 10188.3
+    },
+    {
+      "week": "2016-05-09",
+      "store_id": "CA_3",
+      "sales": 9276.0,
+      "plan": 9474.4,
+      "plan_challenge": 9502.7
+    },
+    {
+      "week": "2016-05-16",
+      "store_id": "CA_3",
+      "sales": 9080.0,
+      "plan": 9208.6,
+      "plan_challenge": 8889.3
+    }
+  ],
+  "method_bakeoff": [
+    {
+      "method": "trail_28",
+      "label": "Trailing 28-day mean (system)",
+      "wmape_pct": 19.87
+    },
+    {
+      "method": "yoy_blend",
+      "label": "YoY blend 50/50 (challenge)",
+      "wmape_pct": 27.45
+    }
+  ],
+  "exceptions_top8": [
+    {
+      "display": "Foods item 362 · California store 3",
+      "wmape_pct": 160.9,
+      "action": "Trim the next order — plan has been running high here.",
+      "weeks_of_supply": 3.17
+    },
+    {
+      "display": "Foods item 234 · California store 2",
+      "wmape_pct": 153.17,
+      "action": "Trim the next order — plan has been running high here.",
+      "weeks_of_supply": 0.39
+    },
+    {
+      "display": "Household item 334 · California store 1",
+      "wmape_pct": 140.74,
+      "action": "Trim the next order — plan high and cover is already over a month.",
+      "weeks_of_supply": 5.02
+    },
+    {
+      "display": "Foods item 362 · California store 1",
+      "wmape_pct": 139.07,
+      "action": "Trim the next order — plan has been running high here.",
+      "weeks_of_supply": 1.71
+    },
+    {
+      "display": "Foods item 362 · California store 2",
+      "wmape_pct": 132.03,
+      "action": "Trim the next order — plan has been running high here.",
+      "weeks_of_supply": 1.7
+    },
+    {
+      "display": "Foods item 741 · California store 3",
+      "wmape_pct": 83.64,
+      "action": "Trim the next order — plan high and cover is already over a month.",
+      "weeks_of_supply": 6.65
+    },
+    {
+      "display": "Foods item 764 · California store 2",
+      "wmape_pct": 73.2,
+      "action": "Trim the next order — plan has been running high here.",
+      "weeks_of_supply": 1.93
+    },
+    {
+      "display": "Foods item 007 · California store 1",
+      "wmape_pct": 71.7,
+      "action": "Trim the next order — sitting on more than four weeks of cover.",
+      "weeks_of_supply": 5.47
+    }
+  ],
+  "cover_bins": [
+    {
+      "bin_label": "0–1",
+      "item_count": 14,
+      "share_pct": 5.8,
+      "over_month": false
+    },
+    {
+      "bin_label": "1–2",
+      "item_count": 94,
+      "share_pct": 39.2,
+      "over_month": false
+    },
+    {
+      "bin_label": "2–3",
+      "item_count": 82,
+      "share_pct": 34.2,
+      "over_month": false
+    },
+    {
+      "bin_label": "3–4",
+      "item_count": 17,
+      "share_pct": 7.1,
+      "over_month": false
+    },
+    {
+      "bin_label": "4–6",
+      "item_count": 10,
+      "share_pct": 4.2,
+      "over_month": true
+    },
+    {
+      "bin_label": "6–8",
+      "item_count": 2,
+      "share_pct": 0.8,
+      "over_month": true
+    },
+    {
+      "bin_label": "8–12",
+      "item_count": 1,
+      "share_pct": 0.4,
+      "over_month": true
+    },
+    {
+      "bin_label": "12+",
+      "item_count": 20,
+      "share_pct": 8.3,
+      "over_month": true
+    }
+  ],
+  "scenario_lift": [
+    {
+      "name": "FOODS +10% Mother's Day / spring-holiday lift (holdout window)",
+      "baseline_units": 73941.0,
+      "scenario_units": 81335.1,
+      "delta_units": 7394.1,
+      "delta_revenue": 14819.12,
+      "delta_pct": 10.0,
+      "plain": "If FOODS sells 10% hotter → +7.4k units / ~$15k — check whether stock can cover it"
+    }
+  ]
+};
+
+    let store = "ALL";
+    let cache = {};
+
+    function parseCSV(text) {
+      const lines = text.trim().split(/\r?\n/);
+      const headers = lines[0].split(",");
+      return lines.slice(1).map((line) => {
+        const cells = [];
+        let cur = "", inQ = false;
+        for (let i = 0; i < line.length; i++) {
+          const ch = line[i];
+          if (ch === '"') { inQ = !inQ; continue; }
+          if (ch === "," && !inQ) { cells.push(cur); cur = ""; continue; }
+          cur += ch;
+        }
+        cells.push(cur);
+        const o = {};
+        headers.forEach((h, i) => { o[h] = cells[i]; });
+        return o;
+      });
+    }
+
+    async function loadRows(name) {
+      if (cache[name]) return cache[name];
+      try {
+        const res = await fetch("./extracts/" + name + ".csv");
+        if (res.ok) {
+          const rows = parseCSV(await res.text());
+          cache[name] = rows;
+          return rows;
+        }
+      } catch (_) { /* file:// or offline — use embed */ }
+      const key = name;
+      const emb = EMBEDDED[key];
+      if (!emb) throw new Error("Missing " + name);
+      cache[name] = emb;
+      return emb;
+    }
+
+    function num(v) { return typeof v === "number" ? v : +v; }
+
+    function setStore(id) {
+      store = id;
+      document.querySelectorAll(".chip[data-store]").forEach((btn) => {
+        btn.setAttribute("aria-pressed", btn.getAttribute("data-store") === id ? "true" : "false");
+      });
+      renderPlan();
+    }
+
+    async function renderPlan() {
+      const rows = await loadRows("plan_vs_actual_weekly");
+      const f = rows.filter((r) => r.store_id === store);
+      f.sort((a, b) => String(a.week).localeCompare(String(b.week)));
+      const x = f.map((r) => r.week);
+      Plotly.newPlot("plan-actual", [
+        {
+          name: "Actual sales",
+          x, y: f.map((r) => num(r.sales)),
+          type: "scatter", mode: "lines+markers",
+          line: { color: RESCUE, width: 2.4 },
+          marker: { color: RESCUE, size: 7 },
+          hovertemplate: "%{x}<br>Actual %{y:,.0f} units<extra></extra>",
+        },
+        {
+          name: "System plan (trail-28)",
+          x, y: f.map((r) => num(r.plan)),
+          type: "scatter", mode: "lines+markers",
+          line: { color: ACCENT, width: 2.4 },
+          marker: { color: ACCENT, size: 7 },
+          hovertemplate: "%{x}<br>Plan %{y:,.0f} units<extra></extra>",
+        },
+        {
+          name: "YoY blend (challenge)",
+          x, y: f.map((r) => num(r.plan_challenge)),
+          type: "scatter", mode: "lines+markers",
+          line: { color: SERIES[1], width: 1.6, dash: "dot" },
+          marker: { color: SERIES[1], size: 5 },
+          hovertemplate: "%{x}<br>YoY blend %{y:,.0f} units<extra></extra>",
+        },
+      ], {
+        ...LAYOUT,
+        yaxis: { ...LAYOUT.yaxis, title: { ...LAYOUT.yaxis.title, text: "Units / week" } },
+        xaxis: { ...LAYOUT.xaxis, title: { ...LAYOUT.xaxis.title, text: "Week starting" } },
+      }, CFG);
+    }
+
+    async function render() {
+      await renderPlan();
+
+      const bake = await loadRows("method_bakeoff");
+      Plotly.newPlot("bakeoff", [{
+        type: "bar",
+        orientation: "h",
+        y: bake.map((r) => r.label),
+        x: bake.map((r) => num(r.wmape_pct)),
+        marker: {
+          color: bake.map((r) => (String(r.method).includes("trail") ? ACCENT : SERIES[1])),
+        },
+        text: bake.map((r) => num(r.wmape_pct).toFixed(2) + "%"),
+        textposition: "outside",
+        cliponaxis: false,
+        hovertemplate: "%{y}<br>WMAPE %{x:.2f}%<extra></extra>",
+      }], {
+        ...LAYOUT,
+        margin: { t: 28, r: 56, b: 40, l: 200 },
+        xaxis: { ...LAYOUT.xaxis, title: { ...LAYOUT.xaxis.title, text: "WMAPE %" }, range: [0, 35] },
+        yaxis: { ...LAYOUT.yaxis, automargin: true },
+        showlegend: false,
+      }, CFG);
+
+      const cover = await loadRows("cover_bins");
+      const overColor = cover.map((r) => {
+        const over = r.over_month === true || r.over_month === "True" || r.over_month === "true";
+        return over ? DANGER : ACCENT;
+      });
+      Plotly.newPlot("cover", [{
+        type: "bar",
+        x: cover.map((r) => r.bin_label),
+        y: cover.map((r) => num(r.share_pct)),
+        marker: { color: overColor },
+        customdata: cover.map((r) => num(r.item_count)),
+        hovertemplate: "%{x} weeks<br>%{y:.1f}% · %{customdata} items<extra></extra>",
+      }], {
+        ...LAYOUT,
+        yaxis: { ...LAYOUT.yaxis, title: { ...LAYOUT.yaxis.title, text: "Share of items" }, ticksuffix: "%" },
+        xaxis: { ...LAYOUT.xaxis, title: { ...LAYOUT.xaxis.title, text: "Weeks of supply" } },
+        showlegend: false,
+        shapes: [{
+          type: "line",
+          x0: 3.5, x1: 3.5, y0: 0, y1: 1, yref: "paper",
+          line: { color: DANGER, width: 1.2, dash: "dash" },
+        }],
+        annotations: [{
+          x: 3.5, y: 1, yref: "paper",
+          text: ">4 weeks",
+          showarrow: false,
+          xanchor: "left",
+          font: { size: 11, color: DANGER },
+          xshift: 6, yshift: -4,
+        }],
+      }, CFG);
+
+      const ex = await loadRows("exceptions_top8");
+      const ordered = [...ex].sort((a, b) => num(a.wmape_pct) - num(b.wmape_pct));
+      Plotly.newPlot("exceptions", [{
+        type: "bar",
+        orientation: "h",
+        y: ordered.map((r) => r.display),
+        x: ordered.map((r) => num(r.wmape_pct)),
+        marker: { color: DANGER },
+        customdata: ordered.map((r) => r.action || ""),
+        hovertemplate: "%{y}<br>Plan miss %{x:.1f}%<br>%{customdata}<extra></extra>",
+      }], {
+        ...LAYOUT,
+        margin: { t: 28, r: 28, b: 40, l: 260 },
+        xaxis: { ...LAYOUT.xaxis, title: { ...LAYOUT.xaxis.title, text: "Plan miss (WMAPE %)" } },
+        yaxis: { ...LAYOUT.yaxis, automargin: true },
+        showlegend: false,
+      }, CFG);
+
+      const scenRows = await loadRows("scenario_lift");
+      const s = scenRows[0] || {};
+      const deltaU = num(s.delta_units);
+      const deltaR = num(s.delta_revenue);
+      const baseU = num(s.baseline_units);
+      const scenU = num(s.scenario_units);
+      const unitsEl = document.getElementById("sc-units");
+      const revEl = document.getElementById("sc-rev");
+      const oneEl = document.getElementById("sc-one");
+      if (unitsEl) unitsEl.textContent = "+" + Math.round(deltaU).toLocaleString("en-US") + " units";
+      if (revEl) revEl.textContent = "~$" + Math.round(deltaR / 1000) + "k";
+      if (oneEl && s.plain) oneEl.textContent = s.plain;
+
+      Plotly.newPlot("scenario", [{
+        type: "bar",
+        x: ["Baseline FOODS", "FOODS +10%"],
+        y: [baseU, scenU],
+        marker: { color: [SERIES[1], ACCENT] },
+        text: [Math.round(baseU).toLocaleString("en-US"), Math.round(scenU).toLocaleString("en-US")],
+        textposition: "outside",
+        cliponaxis: false,
+        hovertemplate: "%{x}<br>%{y:,.0f} units<extra></extra>",
+      }], {
+        ...LAYOUT,
+        margin: { t: 36, r: 16, b: 40, l: 56 },
+        yaxis: { ...LAYOUT.yaxis, title: { ...LAYOUT.yaxis.title, text: "Holdout units" } },
+        showlegend: false,
+        annotations: [{
+          x: 1, y: scenU,
+          text: "+" + Math.round(deltaU).toLocaleString("en-US") + " · ~$" + Math.round(deltaR / 1000) + "k",
+          showarrow: true,
+          arrowhead: 0,
+          ax: 40, ay: -30,
+          font: { size: 12, color: ACCENT },
+          arrowcolor: ACCENT,
+        }],
+      }, CFG);
+    }
+
+    document.querySelectorAll(".chip[data-store]").forEach((btn) => {
+      btn.addEventListener("click", () => setStore(btn.getAttribute("data-store")));
+    });
+    render().catch((e) => {
+      document.querySelector("main").insertAdjacentHTML("afterbegin",
+        "<p class=\"load-err\">Could not load charts: " + e.message + "</p>");
+    });
+  })();
+  </script>
+</body>
+</html>
