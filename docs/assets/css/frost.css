@@ -67,8 +67,8 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
   position: relative;
   z-index: 1;
   height: 100%;
-  display: grid;
-  grid-template-rows: auto minmax(0, 1fr) auto auto;
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
 }
 
@@ -86,12 +86,13 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .as-of { color: rgba(255, 255, 255, 0.78); font-family: var(--font-mono); font-size: 12px; font-weight: 400; letter-spacing: 0; white-space: nowrap; }
 
 .stage {
+  flex: 1 1 0;
   min-height: 0;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   gap: var(--gap);
-  padding: 6px var(--pad) 8px;
+  padding: 6px var(--pad) 72px;
 }
 
 .glass {
@@ -219,6 +220,19 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .cell-action { font-size: 12.5px; line-height: 1.4; color: rgba(255, 255, 255, 0.78); letter-spacing: -0.008em; }
 .field-k { display: none; font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-faint); margin-bottom: 2px; }
 
+.dock {
+  flex: 0 0 auto;
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 20;
+  background: rgba(0, 0, 0, 0.94);
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  padding-top: 4px;
+  -webkit-backdrop-filter: blur(16px) saturate(1.4);
+  backdrop-filter: blur(16px) saturate(1.4);
+}
 .gloss {
   display: flex;
   align-items: stretch;
