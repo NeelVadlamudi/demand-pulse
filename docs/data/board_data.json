@@ -51,7 +51,7 @@
     },
     "blunt_trailing_28d_wmape_pct": 19.87,
     "challenge_yoy_blend_wmape_pct": 27.45,
-    "display_note": "Product labels are real M5 item_id values (e.g. FOODS_3_090). dept_id / cat_id decode the hierarchy: FOODS / HOBBIES / HOUSEHOLD."
+    "display_note": "Board labels use plain English (Foods item 362 \u00b7 California store 3). Underlying M5 item_id / store_id stay in the data for verify."
   },
   "tiles": {
     "wmape_system": {
@@ -95,7 +95,7 @@
     {
       "product": "FOODS_3_362",
       "category": "Foods / FOODS_3",
-      "store": "CA store 3 (CA_3)",
+      "store": "California store 3",
       "store_id": "CA_3",
       "product_id": "FOODS_3_362",
       "metric": "wmape_pct",
@@ -103,14 +103,14 @@
       "why": "Plan missed sales by about 161%.",
       "action": "Trim the next order \u2014 plan has been running high here.",
       "tip": "Trim the next order \u2014 plan has been running high here.",
-      "display": "FOODS_3_362 \u00b7 Foods / FOODS_3 \u00b7 CA store 3 (CA_3)",
+      "display": "Foods item 362 \u00b7 California store 3",
       "weeks_of_supply": 3.17,
       "bias_pct_holdout": 103.0
     },
     {
       "product": "FOODS_3_234",
       "category": "Foods / FOODS_3",
-      "store": "CA store 2 (CA_2)",
+      "store": "California store 2",
       "store_id": "CA_2",
       "product_id": "FOODS_3_234",
       "metric": "wmape_pct",
@@ -118,14 +118,14 @@
       "why": "Plan missed sales by about 153%.",
       "action": "Trim the next order \u2014 plan has been running high here.",
       "tip": "Trim the next order \u2014 plan has been running high here.",
-      "display": "FOODS_3_234 \u00b7 Foods / FOODS_3 \u00b7 CA store 2 (CA_2)",
+      "display": "Foods item 234 \u00b7 California store 2",
       "weeks_of_supply": 0.39,
       "bias_pct_holdout": 9.45
     },
     {
       "product": "HOUSEHOLD_1_334",
       "category": "Household / HOUSEHOLD_1",
-      "store": "CA store 1 (CA_1)",
+      "store": "California store 1",
       "store_id": "CA_1",
       "product_id": "HOUSEHOLD_1_334",
       "metric": "wmape_pct",
@@ -133,14 +133,14 @@
       "why": "Plan missed sales by about 141%.",
       "action": "Trim the next order \u2014 plan high and cover is already over a month.",
       "tip": "Trim the next order \u2014 plan high and cover is already over a month.",
-      "display": "HOUSEHOLD_1_334 \u00b7 Household / HOUSEHOLD_1 \u00b7 CA store 1 (CA_1)",
+      "display": "Household item 334 \u00b7 California store 1",
       "weeks_of_supply": 5.02,
       "bias_pct_holdout": 120.7
     },
     {
       "product": "FOODS_3_362",
       "category": "Foods / FOODS_3",
-      "store": "CA store 1 (CA_1)",
+      "store": "California store 1",
       "store_id": "CA_1",
       "product_id": "FOODS_3_362",
       "metric": "wmape_pct",
@@ -148,14 +148,14 @@
       "why": "Plan missed sales by about 139%.",
       "action": "Trim the next order \u2014 plan has been running high here.",
       "tip": "Trim the next order \u2014 plan has been running high here.",
-      "display": "FOODS_3_362 \u00b7 Foods / FOODS_3 \u00b7 CA store 1 (CA_1)",
+      "display": "Foods item 362 \u00b7 California store 1",
       "weeks_of_supply": 1.71,
       "bias_pct_holdout": 56.52
     },
     {
       "product": "FOODS_3_362",
       "category": "Foods / FOODS_3",
-      "store": "CA store 2 (CA_2)",
+      "store": "California store 2",
       "store_id": "CA_2",
       "product_id": "FOODS_3_362",
       "metric": "wmape_pct",
@@ -163,14 +163,14 @@
       "why": "Plan missed sales by about 132%.",
       "action": "Trim the next order \u2014 plan has been running high here.",
       "tip": "Trim the next order \u2014 plan has been running high here.",
-      "display": "FOODS_3_362 \u00b7 Foods / FOODS_3 \u00b7 CA store 2 (CA_2)",
+      "display": "Foods item 362 \u00b7 California store 2",
       "weeks_of_supply": 1.7,
       "bias_pct_holdout": 38.15
     },
     {
       "product": "FOODS_3_741",
       "category": "Foods / FOODS_3",
-      "store": "CA store 3 (CA_3)",
+      "store": "California store 3",
       "store_id": "CA_3",
       "product_id": "FOODS_3_741",
       "metric": "wmape_pct",
@@ -178,14 +178,14 @@
       "why": "Plan missed sales by about 84%.",
       "action": "Trim the next order \u2014 plan high and cover is already over a month.",
       "tip": "Trim the next order \u2014 plan high and cover is already over a month.",
-      "display": "FOODS_3_741 \u00b7 Foods / FOODS_3 \u00b7 CA store 3 (CA_3)",
+      "display": "Foods item 741 \u00b7 California store 3",
       "weeks_of_supply": 6.65,
       "bias_pct_holdout": 83.64
     },
     {
       "product": "FOODS_3_764",
       "category": "Foods / FOODS_3",
-      "store": "CA store 2 (CA_2)",
+      "store": "California store 2",
       "store_id": "CA_2",
       "product_id": "FOODS_3_764",
       "metric": "wmape_pct",
@@ -193,14 +193,14 @@
       "why": "Plan missed sales by about 73%.",
       "action": "Trim the next order \u2014 plan has been running high here.",
       "tip": "Trim the next order \u2014 plan has been running high here.",
-      "display": "FOODS_3_764 \u00b7 Foods / FOODS_3 \u00b7 CA store 2 (CA_2)",
+      "display": "Foods item 764 \u00b7 California store 2",
       "weeks_of_supply": 1.93,
       "bias_pct_holdout": 37.27
     },
     {
       "product": "FOODS_3_007",
       "category": "Foods / FOODS_3",
-      "store": "CA store 1 (CA_1)",
+      "store": "California store 1",
       "store_id": "CA_1",
       "product_id": "FOODS_3_007",
       "metric": "wmape_pct",
@@ -208,7 +208,7 @@
       "why": "Plan missed sales by about 72%.",
       "action": "Trim the next order \u2014 sitting on more than four weeks of cover.",
       "tip": "Trim the next order \u2014 sitting on more than four weeks of cover.",
-      "display": "FOODS_3_007 \u00b7 Foods / FOODS_3 \u00b7 CA store 1 (CA_1)",
+      "display": "Foods item 007 \u00b7 California store 1",
       "weeks_of_supply": 5.47,
       "bias_pct_holdout": -21.84
     }
