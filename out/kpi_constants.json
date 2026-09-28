@@ -1,0 +1,23 @@
+{
+  "wmape_system": 19.87,
+  "bias_pct": 0.67,
+  "avg_weeks_of_supply": 3.248,
+  "tile4_key": "overstock_share_pct",
+  "tile4_value": 13.8,
+  "system_plan": "trailing_28d_mean",
+  "challenge_plan": "yoy_50_trail_50",
+  "trail_days": 28,
+  "yoy_lag_days": 364,
+  "yoy_weight": 0.5,
+  "trail_weight": 0.5,
+  "start_cover_weeks": 3.0,
+  "target_cover_weeks": 3.0,
+  "lead_time_weeks": 1,
+  "holdout_min": "2016-04-25",
+  "holdout_max": "2016-05-22",
+  "challenge_wmape": 27.45,
+  "use_stockout_tile": false,
+  "overstock_share_pct": 13.8,
+  "stockout_rate_pct": 0.12,
+  "scoring_grain": "weekly"
+}
