@@ -35,9 +35,6 @@ def main() -> None:
     long.to_parquet(PROC / "m5_ca3_top80_daily.parquet", index=False)
     prices.to_parquet(PROC / "m5_ca3_top80_prices.parquet", index=False)
     cal.to_parquet(PROC / "m5_calendar.parquet", index=False)
-    long[["id","item_id","dept_id","cat_id","store_id","state_id","d","date","wm_yr_wk",
-          "weekday","sales","sell_price","event_name_1","event_type_1"]].to_csv(
-        PROC / "m5_ca3_top80_daily.csv", index=False)
     meta = {
         "filter": {
             "description": "3 California stores (CA_1, CA_2, CA_3) × top 80 items by total unit volume across those stores over d_1..d_1941",
