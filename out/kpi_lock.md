@@ -55,7 +55,7 @@ Eight store×item rows in `out/board_data.json` with plain-English trim / lift /
 
 ## Verify
 ```bash
-cd /workspace/demand-pulse-m5 && .venv/bin/python scripts/verify_kpis.py
+python scripts/verify_kpis.py
 ```
 Expect `ALL PASS`.
 
