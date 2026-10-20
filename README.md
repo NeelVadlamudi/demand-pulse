@@ -1,10 +1,10 @@
 # Demand Pulse
 
+**Live board:** https://neelvadlamudi.github.io/demand-pulse/ · **Portfolio:** https://neelvadlamudi.github.io/neelresume/
+
 Demand planning on real [M5 Walmart](https://www.kaggle.com/c/m5-forecasting-accuracy/data) unit sales.
 
 The locked system plan is a **trailing 28-day mean** (built daily, scored weekly). A year-over-year blend lost on this holdout, so it stays in the notebook as a challenge check only.
-
-**Live board:** https://neelvadlamudi.github.io/demand-pulse/
 
 ## Locked results (holdout 2016-04-25 → 2016-05-22)
 
