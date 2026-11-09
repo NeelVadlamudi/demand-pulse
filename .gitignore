@@ -5,3 +5,5 @@ __pycache__/
 data/raw/
 .DS_Store
 data/processed/*.csv
+# M5 rows come from Kaggle and are rebuilt locally by scripts/build_filter.py; never commit them
+data/processed/*.parquet

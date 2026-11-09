@@ -17,9 +17,11 @@ Full M5 is ~30k store×item series. Filter keeps **real M5 rows only**:
 | Days | 1941 (2011-01-29 → 2016-05-22) |
 | Daily rows | 465,840 |
 
-Filter metadata (exact item list + ranks): `data/processed/filter_meta.json`  
-Long extract: `data/processed/m5_ca3_top80_daily.parquet` (+ CSV)  
-Filtered prices: `data/processed/m5_ca3_top80_prices.parquet`
+Filter metadata (exact item list + ranks): `data/processed/filter_meta.json` (committed)  
+`scripts/build_filter.py` writes these locally from `data/raw/`; they are gitignored because they are M5 rows:  
+- Long extract: `data/processed/m5_ca3_top80_daily.parquet`  
+- Filtered prices: `data/processed/m5_ca3_top80_prices.parquet`  
+- Calendar: `data/processed/m5_calendar.parquet`
 
 ## Holdout
 Last **28** days of the evaluation series: **2016-04-25 → 2016-05-22** (d_1914…d_1941), classic M5-style window.  

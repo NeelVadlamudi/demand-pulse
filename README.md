@@ -22,15 +22,17 @@ Inventory cover is **simulated** with a simple reorder policy. Public M5 has no 
 - `docs/` — interactive board (GitHub Pages)
 - `out/` — locked board JSON, KPI write-up, holdout chart
 - `notebooks/demand_pulse_m5.ipynb` — methods and challenge check
-- `data/processed/` — filtered CA_1/2/3 × top-80 items extract
+- `data/processed/filter_meta.json` — the exact stores and items the filter keeps (the extract itself is rebuilt locally, not committed)
 - `scripts/verify_kpis.py` — recomputes the locked tiles
 
-Raw M5 CSVs are not committed (large). Download from Kaggle or the Hugging Face mirror `denephew/M5_Forecasting`, then run `scripts/build_filter.py`. See `data/README.md`.
+No M5 rows are committed, raw or filtered. The data is Kaggle's to share, not mine, so you rebuild it: download the M5 CSVs from Kaggle (or the Hugging Face mirror `denephew/M5_Forecasting`) into `data/raw/`, then run `scripts/build_filter.py`. See `data/README.md`.
 
 ## Verify
 
 ```bash
 python3 -m venv .venv && .venv/bin/pip install pandas pyarrow
+# put calendar.csv, sell_prices.csv and sales_train_evaluation.csv in data/raw/ first
+.venv/bin/python scripts/build_filter.py
 .venv/bin/python scripts/verify_kpis.py
 ```
 
