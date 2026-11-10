@@ -43,7 +43,7 @@ Public M5 has **no on-hand**. For WOS / overstock story:
 | WMAPE (system plan) | **19.87%** | Weekly WMAPE of trailing-28 plan vs actual on the 28-day holdout. |
 | Bias % (system plan) | **0.67%** | sum(plan − actual) / sum(actual) on weekly holdout rollups. Positive = slight over-forecast. |
 | Avg weeks of supply | **3.248** | Simulated ending inventory ÷ that week's sales, averaged across items with sales on last week (**2016-05-16** week start). |
-| Overstock share (WOS > 4) | **13.8%** | Share of keys with more than four weeks of simulated cover (~1 in 10). |
+| Overstock share (WOS > 4) | **13.8%** | Share of keys with more than four weeks of simulated cover (about 1 in 7). |
 
 **Tile-4 choice:** Overstock share. Simulated unmet demand on holdout weeks was **0.12%** (< 0.5% cutoff).
 

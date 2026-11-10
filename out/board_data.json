@@ -76,7 +76,7 @@
       "value": 13.8,
       "label": "Items over a month of stock",
       "definition": "Share of items with more than 4 weeks of simulated cover on the last week.",
-      "plain": "1 in 10 items over a month of stock"
+      "plain": "about 1 in 7 items over a month of stock"
     }
   },
   "scenario": {
